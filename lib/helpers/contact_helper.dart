@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
@@ -58,6 +59,37 @@ class ContactHelper{
     }
     return null;
   }
+
+  Future<int >deleteContact(int id)async{
+    Database database = await db;
+    return await database.delete(contactTable, where: "$idColumn = ?",whereArgs: [id]);
+  }
+
+  Future <int> updateContact(Contact contact) async{
+    Database database = await db;
+    return await database.update(contactTable, contact.toMap(), where: "$idColumn = ?",whereArgs: [contact.id]);
+  }
+
+  Future<List> getAllContact() async{
+    Database database = await db;
+    List<Map> contactsMaps = await database.rawQuery("SELECT * FROM $contactTable");
+    List<Contact> contacts = List();
+    for(Map m in contactsMaps){
+      contacts.add(Contact.fromMap(m));
+    }
+    return contacts;
+  }
+
+  Future<int> getCount() async{
+    Database database = await db;
+    return Sqflite.firstIntValue(await database.rawQuery("SELET COUNT(*) FROM $contactTable"));
+  }
+
+  Future close() async{
+    Database database = await db;
+    database.close();
+  }
+
 }
 
 class Contact{
